@@ -139,6 +139,8 @@ def answer_question(question, top_k=5):
         'latency_ms': latency_ms,
         'prompt_tokens': rag_query.prompt_tokens,
         'completion_tokens': rag_query.completion_tokens,
+        'langsmith_trace_id': rag_query.langsmith_trace_id,
+        'langfuse_trace_id': rag_query.langfuse_trace_id,
     }
 
 

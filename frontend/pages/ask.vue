@@ -76,6 +76,17 @@ const askQuestion = async () => {
           <span>Page {{ source.page_number ?? 'unknown' }} / score {{ source.score }}</span>
         </div>
       </div>
+
+      <div style="margin-top: 24px;">
+        <TraceTimeline
+          :latency-ms="answer.latency_ms"
+          :prompt-tokens="answer.prompt_tokens"
+          :completion-tokens="answer.completion_tokens"
+          :langsmith-trace-id="answer.langsmith_trace_id"
+          :langfuse-trace-id="answer.langfuse_trace_id"
+          :sources="answer.sources"
+        />
+      </div>
     </section>
   </div>
 </template>

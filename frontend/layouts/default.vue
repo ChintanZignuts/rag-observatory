@@ -18,6 +18,10 @@
           <span class="nav-icon" aria-hidden="true">▦</span>
           Evaluations
         </NuxtLink>
+        <NuxtLink to="/regression" class="nav-link">
+          <span class="nav-icon" aria-hidden="true">⇄</span>
+          Regression
+        </NuxtLink>
         <NuxtLink to="/ask" class="nav-link">
           <span class="nav-icon" aria-hidden="true">?</span>
           Ask Console

@@ -65,4 +65,28 @@ export type AskResponse = {
   latency_ms: number
   prompt_tokens: number | null
   completion_tokens: number | null
+  langsmith_trace_id?: string
+  langfuse_trace_id?: string
 }
+
+export type RagQuery = {
+  id: number
+  question: string
+  answer: string
+  latency_ms: number
+  prompt_tokens: number | null
+  completion_tokens: number | null
+  langsmith_trace_id: string
+  langfuse_trace_id: string
+  created_at: string
+  sources: Array<{
+    document: string
+    page_number: number | null
+    score: number
+  }>
+}
+
+export type QueriesResponse = {
+  results: RagQuery[]
+}
+

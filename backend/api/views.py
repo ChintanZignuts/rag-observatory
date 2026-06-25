@@ -8,6 +8,7 @@ from .models import (
     EvaluationRun,
     PolicyDocument,
     QuestionSetItem,
+    RagQuery,
 )
 from .services.rag import OllamaError, answer_question, search_chunks
 
@@ -168,3 +169,36 @@ def evaluation_run_detail(request, run_id):
             ],
         }
     )
+
+
+@api_view(['GET'])
+def queries(request):
+    queries = RagQuery.objects.order_by('-created_at')[:50]
+
+    return Response(
+        {
+            'results': [
+                {
+                    'id': q.id,
+                    'question': q.question,
+                    'answer': q.answer,
+                    'latency_ms': q.latency_ms,
+                    'prompt_tokens': q.prompt_tokens,
+                    'completion_tokens': q.completion_tokens,
+                    'langsmith_trace_id': q.langsmith_trace_id,
+                    'langfuse_trace_id': q.langfuse_trace_id,
+                    'created_at': q.created_at,
+                    'sources': [
+                        {
+                            'document': context.get('document'),
+                            'page_number': context.get('page_number'),
+                            'score': context.get('score'),
+                        }
+                        for context in q.retrieved_context
+                    ] if isinstance(q.retrieved_context, list) else []
+                }
+                for q in queries
+            ]
+        }
+    )
+
