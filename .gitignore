@@ -18,3 +18,8 @@ node_modules/
 .nuxt/
 .output/
 dist/
+
+# Project documentation and plans
+PRODUCT.md
+implementation_plan.md
+
