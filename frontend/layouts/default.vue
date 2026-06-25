@@ -2,10 +2,10 @@
   <div class="app-shell">
     <aside class="sidebar" aria-label="Primary navigation">
       <NuxtLink class="brand" to="/">
-        <span class="brand-mark">AQ</span>
+        <span class="brand-mark">VR</span>
         <span>
-          <strong>AI Quality</strong>
-          <small>HR policy RAG</small>
+          <strong>Veridical RAG</strong>
+          <small>HR Policy Evaluation</small>
         </span>
       </NuxtLink>
 
