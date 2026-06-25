@@ -5,6 +5,9 @@ import urllib.request
 from time import perf_counter
 
 from django.conf import settings
+from langsmith import traceable
+from langsmith.run_helpers import get_current_run_tree
+from langfuse.decorators import observe, langfuse_context
 
 from api.models import DocumentChunk, RagQuery
 
@@ -43,6 +46,8 @@ def create_embedding(text):
     return embedding
 
 
+@observe(as_type="span", name="Retrieve Chunks")
+@traceable(name="Retrieve Chunks", run_type="retriever")
 def search_chunks(query, top_k=5):
     query_embedding = create_embedding(query)
     candidates = DocumentChunk.objects.select_related('document').exclude(
@@ -70,6 +75,8 @@ def search_chunks(query, top_k=5):
     ]
 
 
+@observe(name="HR Policy RAG Q&A")
+@traceable(name="HR Policy RAG Q&A", run_type="chain")
 def answer_question(question, top_k=5):
     started_at = perf_counter()
     contexts = search_chunks(question, top_k=top_k)
@@ -80,6 +87,29 @@ def answer_question(question, top_k=5):
     answer = generation.get('response', '').strip()
     source_documents = sorted({context['document'] for context in contexts})
 
+    langsmith_trace_id = ""
+    try:
+        run_tree = get_current_run_tree()
+        if run_tree:
+            langsmith_trace_id = str(run_tree.id)
+    except Exception:
+        pass
+
+    langfuse_trace_id = ""
+    try:
+        langfuse_trace_id = langfuse_context.get_current_trace_id() or ""
+    except Exception:
+        pass
+
+    try:
+        langfuse_context.update_current_trace(
+            input=question,
+            output=answer,
+            metadata={"top_k": top_k, "source_documents": source_documents}
+        )
+    except Exception:
+        pass
+
     rag_query = RagQuery.objects.create(
         question=question,
         answer=answer,
@@ -88,6 +118,8 @@ def answer_question(question, top_k=5):
         latency_ms=latency_ms,
         prompt_tokens=generation.get('prompt_eval_count'),
         completion_tokens=generation.get('eval_count'),
+        langsmith_trace_id=langsmith_trace_id,
+        langfuse_trace_id=langfuse_trace_id,
     )
 
     return {
@@ -110,6 +142,8 @@ def answer_question(question, top_k=5):
     }
 
 
+@observe(as_type="generation", name="Generate Text")
+@traceable(name="Generate Text", run_type="llm")
 def generate_text(prompt):
     payload = json.dumps(
         {
@@ -140,6 +174,16 @@ def generate_text(prompt):
 
     if not isinstance(data.get('response'), str):
         raise OllamaError(f'Ollama returned an invalid generation response: {data}')
+
+    langfuse_context.update_current_observation(
+        input=prompt,
+        output=data.get('response'),
+        model=settings.OLLAMA_LLM_MODEL,
+        usage={
+            "input": data.get('prompt_eval_count', 0),
+            "output": data.get('eval_count', 0)
+        }
+    )
 
     return data
 
