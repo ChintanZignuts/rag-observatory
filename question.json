@@ -1,0 +1,272 @@
+[
+  {
+    "id": "HR-01",
+    "category": "Leave",
+    "difficulty": "easy",
+    "question": "How many casual leaves are allowed in a year?",
+    "expected_answer": "",
+    "source_doc": "HR docs/LEAVE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-02",
+    "category": "Leave",
+    "difficulty": "easy",
+    "question": "How many sick leaves are allowed in a year?",
+    "expected_answer": "",
+    "source_doc": "HR docs/LEAVE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-03",
+    "category": "Leave",
+    "difficulty": "medium",
+    "question": "Can unused leave be carried forward to the next year?",
+    "expected_answer": "",
+    "source_doc": "HR docs/LEAVE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-04",
+    "category": "Leave",
+    "difficulty": "medium",
+    "question": "What is the approval process for planned leave?",
+    "expected_answer": "",
+    "source_doc": "HR docs/LEAVE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-05",
+    "category": "Leave",
+    "difficulty": "hard",
+    "question": "Is leave allowed during the probation period?",
+    "expected_answer": "",
+    "source_doc": "HR docs/LEAVE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-06",
+    "category": "Attendance",
+    "difficulty": "easy",
+    "question": "What are the official working days and working hours?",
+    "expected_answer": "",
+    "source_doc": "HR docs/WORKING DAYS AND WORK HOURS POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-07",
+    "category": "Attendance",
+    "difficulty": "easy",
+    "question": "What is the official office start time?",
+    "expected_answer": "",
+    "source_doc": "HR docs/WORKING DAYS AND WORK HOURS POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-08",
+    "category": "Attendance",
+    "difficulty": "medium",
+    "question": "What happens if an employee forgets to punch in or punch out?",
+    "expected_answer": "",
+    "source_doc": "HR docs/WORKING DAYS AND WORK HOURS POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-09",
+    "category": "Attendance",
+    "difficulty": "medium",
+    "question": "Is late arrival allowed, and if yes, under what conditions?",
+    "expected_answer": "",
+    "source_doc": "HR docs/WORKING DAYS AND WORK HOURS POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-10",
+    "category": "Attendance",
+    "difficulty": "hard",
+    "question": "How is overtime handled or approved?",
+    "expected_answer": "",
+    "source_doc": "HR docs/WORKING DAYS AND WORK HOURS POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-11",
+    "category": "Remote Work",
+    "difficulty": "easy",
+    "question": "How many work-from-home days are allowed per week or month?",
+    "expected_answer": "",
+    "source_doc": "HR docs/REMOTE WORK POLICY .pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-12",
+    "category": "Remote Work",
+    "difficulty": "easy",
+    "question": "Do employees need approval before working from home?",
+    "expected_answer": "",
+    "source_doc": "HR docs/REMOTE WORK POLICY .pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-13",
+    "category": "Remote Work",
+    "difficulty": "medium",
+    "question": "Are there restrictions on working from home during probation?",
+    "expected_answer": "",
+    "source_doc": "HR docs/REMOTE WORK POLICY .pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-14",
+    "category": "Remote Work",
+    "difficulty": "hard",
+    "question": "Can employees work remotely from another city or state?",
+    "expected_answer": "",
+    "source_doc": "HR docs/REMOTE WORK POLICY .pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-15",
+    "category": "Remote Work",
+    "difficulty": "hard",
+    "question": "What are the expectations for availability while working remotely?",
+    "expected_answer": "",
+    "source_doc": "HR docs/REMOTE WORK POLICY .pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-16",
+    "category": "Conduct",
+    "difficulty": "easy",
+    "question": "What is the dress code or attire policy for employees?",
+    "expected_answer": "",
+    "source_doc": "HR docs/ATTIRE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-17",
+    "category": "Conduct",
+    "difficulty": "medium",
+    "question": "Are there different attire expectations for client meetings or office days?",
+    "expected_answer": "",
+    "source_doc": "HR docs/ATTIRE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-18",
+    "category": "Conduct",
+    "difficulty": "medium",
+    "question": "What is considered inappropriate attire under the policy?",
+    "expected_answer": "",
+    "source_doc": "HR docs/ATTIRE POLICY.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-19",
+    "category": "Conduct",
+    "difficulty": "easy",
+    "question": "What are the rules for using social media when representing the company?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Social Media Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-20",
+    "category": "Conduct",
+    "difficulty": "medium",
+    "question": "Can employees post company-related information on personal social media accounts?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Social Media Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-21",
+    "category": "Conduct",
+    "difficulty": "hard",
+    "question": "What is prohibited when posting about the company online?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Social Media Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-22",
+    "category": "Onboarding",
+    "difficulty": "easy",
+    "question": "What documents or actions are required for a service request or onboarding support request?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Service Request Process.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-23",
+    "category": "Onboarding",
+    "difficulty": "medium",
+    "question": "How should an employee raise a new HR or admin service request?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Service Request Process.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-24",
+    "category": "Onboarding",
+    "difficulty": "hard",
+    "question": "What is the escalation path if a service request is delayed?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Service Request Process.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-25",
+    "category": "Separation",
+    "difficulty": "easy",
+    "question": "What is the resignation notice period for employees?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Resignation - Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-26",
+    "category": "Separation",
+    "difficulty": "medium",
+    "question": "What steps must be completed before an employee exits after resignation?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Resignation - Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-27",
+    "category": "Separation",
+    "difficulty": "hard",
+    "question": "What happens to unused leave or pending dues when an employee resigns?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Resignation - Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-28",
+    "category": "Separation",
+    "difficulty": "easy",
+    "question": "Under what circumstances can termination happen according to policy?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Termination - Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-29",
+    "category": "Separation",
+    "difficulty": "medium",
+    "question": "What is the process followed when employment is terminated?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Termination - Policy.pdf",
+    "source_section": ""
+  },
+  {
+    "id": "HR-30",
+    "category": "Separation",
+    "difficulty": "hard",
+    "question": "What handover, clearance, or final settlement steps are required during termination?",
+    "expected_answer": "",
+    "source_doc": "HR docs/Separation by Termination - Policy.pdf",
+    "source_section": ""
+  }
+]
