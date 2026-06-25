@@ -38,7 +38,7 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
     </header>
 
     <section v-if="overviewError" class="alert-panel">
-      Django API is not reachable. Start the backend on port 8001 and refresh this page.
+      Django API is not reachable. Start the backend on port 8000 and refresh this page.
     </section>
 
     <section class="metrics-grid" aria-label="System summary">

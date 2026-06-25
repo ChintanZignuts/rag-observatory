@@ -77,9 +77,9 @@ Veridical RAG is an enterprise-grade AI Quality Engineering platform designed fo
    # Load evaluation questions from question.json
    python manage.py load_questions
    ```
-6. Start the Django development server on port `8001`:
+6. Start the Django development server on port `8000`:
    ```bash
-   python manage.py run_server 127.0.0.1:8001
+   python manage.py runserver 127.0.0.1:8000
    ```
 
 ---

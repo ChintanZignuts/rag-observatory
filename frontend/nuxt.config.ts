@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       // @ts-ignore
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:8001/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api',
     },
   },
 })
