@@ -2,7 +2,7 @@
 import type { AskResponse } from '~/types/api'
 import { formatDuration } from '~/utils/format'
 
-const question = ref('What is the resignation notice period?')
+const question = ref('How many casual leaves are allowed in a year?')
 const topK = ref(5)
 const minSimilarity = ref(0.0)
 const answer = ref<AskResponse | null>(null)
