@@ -6,8 +6,8 @@ const overviewUrl = useApiUrl('/overview/')
 const runsUrl = useApiUrl('/evaluation-runs/')
 const queriesUrl = useApiUrl('/queries/')
 
-const { data: overview, pending: overviewPending, error: overviewError } = await useFetch<Overview>(overviewUrl)
-const { data: runs } = await useFetch<EvaluationRunsResponse>(runsUrl)
+const { data: overview, pending: overviewPending, error: overviewError, refresh: refreshOverview } = await useFetch<Overview>(overviewUrl)
+const { data: runs, refresh: refreshRuns } = await useFetch<EvaluationRunsResponse>(runsUrl)
 const { data: recentQueries, refresh: refreshQueries } = await useFetch<QueriesResponse>(queriesUrl)
 
 const latestRuns = computed(() => runs.value?.results || [])
@@ -22,6 +22,91 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
     refreshQueries()
   }
 }
+
+// Modal & trigger state
+const showModal = ref(false)
+const newRunName = ref('')
+const scoreWithRagas = ref(true)
+const triggering = ref(false)
+
+const openTriggerModal = () => {
+  const dateStr = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
+  newRunName.value = `Web Manual Run - ${dateStr}`
+  scoreWithRagas.value = true
+  showModal.value = true
+}
+
+const refreshAllData = async () => {
+  await Promise.all([
+    refreshOverview(),
+    refreshRuns(),
+    refreshQueries()
+  ])
+}
+
+const isPolling = ref(false)
+let pollingInterval: any = null
+
+const checkIfRunningRecent = () => {
+  return runs.value?.results.some(r => {
+    if (r.status !== 'running' || !r.started_at) return false
+    // Only poll if started in the last 60 minutes to avoid stuck runs
+    const started = new Date(r.started_at)
+    return (new Date().getTime() - started.getTime()) < 60 * 60 * 1000
+  }) || false
+}
+
+const startPolling = () => {
+  if (isPolling.value) return
+  isPolling.value = true
+  pollingInterval = setInterval(async () => {
+    await refreshAllData()
+    const hasRunning = checkIfRunningRecent()
+    if (!hasRunning) {
+      stopPolling()
+    }
+  }, 4000)
+}
+
+const stopPolling = () => {
+  isPolling.value = false
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
+}
+
+const triggerEvaluation = async () => {
+  triggering.value = true
+  try {
+    await $fetch(useApiUrl('/evaluation-runs/run/'), {
+      method: 'POST',
+      body: {
+        name: newRunName.value,
+        score_with_ragas: scoreWithRagas.value
+      }
+    })
+    showModal.value = false
+    await refreshAllData()
+    startPolling()
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Failed to trigger evaluation')
+  } finally {
+    triggering.value = false
+  }
+}
+
+// Auto-detect and poll if any runs are active at startup
+onMounted(() => {
+  const hasRunning = checkIfRunningRecent()
+  if (hasRunning) {
+    startPolling()
+  }
+})
+
+onUnmounted(() => {
+  stopPolling()
+})
 </script>
 
 <template>
@@ -34,7 +119,12 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
           Monitor document coverage, evaluation runs, and answer quality for the local RAG pipeline.
         </p>
       </div>
-      <NuxtLink class="button primary" to="/ask">Test a question</NuxtLink>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="button secondary" @click="openTriggerModal" :disabled="isPolling">
+          {{ isPolling ? 'Running...' : '▦ Start Evaluation' }}
+        </button>
+        <NuxtLink class="button primary" to="/ask">Test a question</NuxtLink>
+      </div>
     </header>
 
     <section v-if="overviewError" class="alert-panel">
@@ -98,7 +188,9 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
       <!-- 1. EVALUATION RUNS TAB -->
       <div v-show="activeTab === 'evaluations'" class="tab-content content-grid">
         <div class="run-summary-card">
-          <h3>Latest Run Summary</h3>
+          <div class="card-header-flex">
+            <h3>Latest Run Summary</h3>
+          </div>
           <div v-if="latest" class="run-summary">
             <div class="summary-line">
               <span>Name</span>
@@ -207,11 +299,39 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
         </div>
       </div>
     </section>
+
+    <!-- Trigger Evaluation Modal -->
+    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+      <div class="modal-card">
+        <h3>Trigger Evaluation Run</h3>
+        <p class="modal-intro">This will execute the entire active HR question set against the current RAG pipeline in the background.</p>
+        
+        <form @submit.prevent="triggerEvaluation" class="modal-form">
+          <label>
+            <span class="label-desc">Run Name</span>
+            <input v-model="newRunName" type="text" required placeholder="Enter run name" class="text-input" />
+          </label>
+          
+          <label class="checkbox-label">
+            <input v-model="scoreWithRagas" type="checkbox" />
+            <span>Score with RAGAS metrics (Faithfulness, Precision, Relevance)</span>
+          </label>
+          
+          <div class="modal-actions">
+            <button type="button" class="button secondary" @click="showModal = false" :disabled="triggering">Cancel</button>
+            <button type="submit" class="button primary" :disabled="triggering || !newRunName.trim()">
+              {{ triggering ? 'Starting...' : 'Launch Run' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .trends-section {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 8px;
 }
 
@@ -267,8 +387,7 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
   font-size: 0.95rem;
   margin: 0 0 14px;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: normal;
 }
 
 .queries-table {
@@ -352,5 +471,116 @@ const handleTabChange = (tab: 'evaluations' | 'queries') => {
 
 .text-center {
   text-align: center;
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.button.small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeInModal 150ms ease-out;
+}
+
+.modal-card {
+  background-color: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-card h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  color: var(--ink, #111827);
+}
+
+.modal-intro {
+  color: var(--muted, #6b7280);
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.modal-form label {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.label-desc {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-top: 4px;
+  box-sizing: border-box;
+  background-color: var(--surface-muted);
+  color: var(--ink);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.checkbox-label input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

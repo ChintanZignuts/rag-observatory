@@ -1,3 +1,11 @@
+<script setup lang="ts">
+const handleLogout = () => {
+  const token = useCookie('auth_token')
+  token.value = null
+  navigateTo('/login')
+}
+</script>
+
 <template>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Primary navigation">
@@ -26,6 +34,11 @@
           <span class="nav-icon" aria-hidden="true">?</span>
           Ask Console
         </NuxtLink>
+        
+        <button @click="handleLogout" class="nav-link logout-btn">
+          <span class="nav-icon" aria-hidden="true">⎋</span>
+          Logout
+        </button>
       </nav>
 
       <div class="sidebar-status">
@@ -39,3 +52,13 @@
     </main>
   </div>
 </template>
+
+<style scoped>
+.logout-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+</style>

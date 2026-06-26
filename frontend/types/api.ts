@@ -67,6 +67,8 @@ export type AskResponse = {
   completion_tokens: number | null
   langsmith_trace_id?: string
   langfuse_trace_id?: string
+  langfuse_project_id?: string
+  langfuse_host?: string
 }
 
 export type RagQuery = {

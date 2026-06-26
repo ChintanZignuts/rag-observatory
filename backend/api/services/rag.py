@@ -11,6 +11,21 @@ from langfuse.decorators import observe, langfuse_context
 
 from api.models import DocumentChunk, RagQuery
 
+# Initialize Langfuse client for prompt registry
+langfuse_client = None
+if settings.LANGFUSE_PUBLIC_KEY and settings.LANGFUSE_SECRET_KEY:
+    try:
+        from langfuse import Langfuse
+        langfuse_client = Langfuse(
+            public_key=settings.LANGFUSE_PUBLIC_KEY,
+            secret_key=settings.LANGFUSE_SECRET_KEY,
+            host=settings.LANGFUSE_HOST
+        )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to initialize Langfuse client: {e}")
+
+
 
 class OllamaError(RuntimeError):
     pass
@@ -48,7 +63,7 @@ def create_embedding(text):
 
 @observe(as_type="span", name="Retrieve Chunks")
 @traceable(name="Retrieve Chunks", run_type="retriever")
-def search_chunks(query, top_k=5):
+def search_chunks(query, top_k=5, min_similarity=None):
     query_embedding = create_embedding(query)
     candidates = DocumentChunk.objects.select_related('document').exclude(
         embedding__isnull=True
@@ -57,6 +72,8 @@ def search_chunks(query, top_k=5):
     scored_chunks = []
     for chunk in candidates:
         score = cosine_similarity(query_embedding, chunk.embedding)
+        if min_similarity is not None and score < min_similarity:
+            continue
         scored_chunks.append((score, chunk))
 
     scored_chunks.sort(key=lambda item: item[0], reverse=True)
@@ -77,9 +94,9 @@ def search_chunks(query, top_k=5):
 
 @observe(name="HR Policy RAG Q&A")
 @traceable(name="HR Policy RAG Q&A", run_type="chain")
-def answer_question(question, top_k=5):
+def answer_question(question, top_k=5, min_similarity=None):
     started_at = perf_counter()
-    contexts = search_chunks(question, top_k=top_k)
+    contexts = search_chunks(question, top_k=top_k, min_similarity=min_similarity)
     prompt = build_answer_prompt(question=question, contexts=contexts)
     generation = generate_text(prompt)
     latency_ms = int((perf_counter() - started_at) * 1000)
@@ -207,6 +224,15 @@ def build_answer_prompt(question, contexts):
         )
 
     joined_context = '\n\n---\n\n'.join(context_blocks)
+
+    # Try fetching from Langfuse Prompt Registry
+    if langfuse_client:
+        try:
+            langfuse_prompt = langfuse_client.get_prompt("hr_policy_qa_prompt", cache_ttl_seconds=60)
+            return langfuse_prompt.compile(question=question, contexts=joined_context)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Error fetching from Langfuse Prompt Registry: {e}. Using local fallback prompt.")
 
     return f"""You are an HR policy assistant for an internal company knowledge base.
 

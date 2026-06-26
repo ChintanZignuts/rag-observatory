@@ -1,5 +1,9 @@
+import threading
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import (
@@ -10,10 +14,11 @@ from .models import (
     QuestionSetItem,
     RagQuery,
 )
-from .services.rag import OllamaError, answer_question, search_chunks
+from .services.rag import OllamaError, answer_question, search_chunks, langfuse_client
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def health_check(request):
     return Response({'status': 'ok'})
 
@@ -77,6 +82,13 @@ def ask(request):
     question = (request.data.get('question') or request.data.get('query') or '').strip()
     top_k = int(request.data.get('top_k') or 5)
     include_context = bool(request.data.get('include_context'))
+    min_similarity = request.data.get('min_similarity')
+
+    if min_similarity is not None:
+        try:
+            min_similarity = float(min_similarity)
+        except ValueError:
+            min_similarity = None
 
     if not question:
         return Response(
@@ -87,7 +99,12 @@ def ask(request):
     top_k = max(1, min(top_k, 10))
 
     try:
-        result = answer_question(question=question, top_k=top_k)
+        result = answer_question(question=question, top_k=top_k, min_similarity=min_similarity)
+        try:
+            from langfuse.decorators import langfuse_context
+            langfuse_context.flush()
+        except Exception:
+            pass
     except OllamaError as error:
         return Response(
             {'error': str(error)},
@@ -97,7 +114,67 @@ def ask(request):
     if not include_context:
         result.pop('retrieved_context', None)
 
+    # Extract Langfuse Project ID from Langfuse client or fallback to Public Key
+    project_id = ''
+    if langfuse_client:
+        try:
+            project_id = langfuse_client._get_project_id() or ''
+        except Exception:
+            pass
+
+    if not project_id:
+        public_key = getattr(settings, 'LANGFUSE_PUBLIC_KEY', '')
+        project_id = public_key.replace('pk-lf-', '') if public_key.startswith('pk-lf-') else ''
+
+    result['langfuse_project_id'] = project_id
+    result['langfuse_host'] = getattr(settings, 'LANGFUSE_HOST', 'https://cloud.langfuse.com')
+
     return Response(result)
+
+
+@api_view(['POST'])
+def run_evaluation(request):
+    name = (request.data.get('name') or '').strip()
+    if not name:
+        name = f"Manual Run - {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+    score_with_ragas = bool(request.data.get('score_with_ragas', True))
+
+    evaluation_run = EvaluationRun.objects.create(
+        name=name,
+        status='running',
+        started_at=timezone.now(),
+    )
+
+    def execute_eval():
+        from django.core.management import call_command
+        try:
+            call_command(
+                'run_eval',
+                name=name,
+                run_id=evaluation_run.id,
+                score_with_ragas=score_with_ragas,
+            )
+        except Exception as e:
+            evaluation_run.status = 'failed'
+            evaluation_run.completed_at = timezone.now()
+            evaluation_run.notes = f"Subprocess error: {e}"
+            evaluation_run.save(update_fields=['status', 'completed_at', 'notes', 'updated_at'])
+
+    thread = threading.Thread(target=execute_eval)
+    thread.daemon = True
+    thread.start()
+
+    return Response(
+        {
+            'id': evaluation_run.id,
+            'name': evaluation_run.name,
+            'status': evaluation_run.status,
+            'started_at': evaluation_run.started_at,
+            'created_at': evaluation_run.created_at,
+        },
+        status=status.HTTP_202_ACCEPTED
+    )
 
 
 @api_view(['GET'])

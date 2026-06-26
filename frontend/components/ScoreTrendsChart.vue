@@ -281,7 +281,7 @@ const relevancePath = computed(() => getPathData('average_answer_relevance'))
 .path-line.relevance { stroke: var(--warning); }
 
 .dot-circle {
-  fill: white;
+  fill: var(--surface);
   stroke-width: 2px;
   transition: r 120ms ease;
 }
@@ -314,12 +314,12 @@ const relevancePath = computed(() => getPathData('average_answer_relevance'))
   position: absolute;
   top: 48px;
   left: 65px;
-  background: var(--ink);
-  color: white;
+  background: var(--surface-muted);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
   padding: 10px 14px;
   border-radius: var(--radius);
   font-size: 0.78rem;
-  box-shadow: var(--shadow);
   pointer-events: none;
   z-index: 10;
   display: flex;

@@ -287,7 +287,7 @@ select {
   padding: 0 12px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: white;
+  background: var(--surface-muted);
   color: var(--ink);
   font-size: 0.9rem;
 }
@@ -309,8 +309,7 @@ select {
   margin: 0 0 10px;
   font-size: 0.85rem;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: normal;
 }
 
 .comparison-value {
@@ -403,12 +402,12 @@ select {
 }
 
 .delta-positive {
-  background: oklch(0.95 0.02 150);
+  background: rgba(0, 245, 212, 0.12);
   color: var(--success);
 }
 
 .delta-negative {
-  background: oklch(0.95 0.02 28);
+  background: rgba(255, 107, 107, 0.12);
   color: var(--danger);
   animation: pulse 1.8s infinite alternate;
 }

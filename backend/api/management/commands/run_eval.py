@@ -32,17 +32,34 @@ class Command(BaseCommand):
             action='store_true',
             help='Run RAGAS scoring after each generated answer.',
         )
+        parser.add_argument(
+            '--run-id',
+            type=int,
+            default=None,
+            help='Reuse existing EvaluationRun ID.',
+        )
 
     def handle(self, *args, **options):
         questions = QuestionSetItem.objects.filter(is_active=True).order_by('question_id')
         if options['limit']:
             questions = questions[: options['limit']]
 
-        evaluation_run = EvaluationRun.objects.create(
-            name=options['name'],
-            status='running',
-            started_at=timezone.now(),
-        )
+        run_id = options.get('run_id')
+        if run_id:
+            try:
+                evaluation_run = EvaluationRun.objects.get(id=run_id)
+                evaluation_run.status = 'running'
+                evaluation_run.started_at = timezone.now()
+                evaluation_run.save(update_fields=['status', 'started_at', 'updated_at'])
+            except EvaluationRun.DoesNotExist:
+                self.stderr.write(self.style.ERROR(f"EvaluationRun #{run_id} does not exist."))
+                return
+        else:
+            evaluation_run = EvaluationRun.objects.create(
+                name=options['name'],
+                status='running',
+                started_at=timezone.now(),
+            )
 
         self.stdout.write(f'Started evaluation run #{evaluation_run.id}: {evaluation_run.name}')
 

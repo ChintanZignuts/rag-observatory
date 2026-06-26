@@ -7,6 +7,8 @@ const props = defineProps<{
   completionTokens: number | null | undefined
   langsmithTraceId: string | null | undefined
   langfuseTraceId: string | null | undefined
+  langfuseProjectId: string | null | undefined
+  langfuseHost: string | null | undefined
   sources: Array<{ document: string; page_number: number | null; score?: number }>
 }>()
 
@@ -29,8 +31,9 @@ const copyId = async (text: string, type: 'smith' | 'fuse') => {
 
 // Compute generic dashboard links
 const langfuseLink = computed(() => {
-  if (!props.langfuseTraceId) return '#'
-  return `https://cloud.langfuse.com/project/traces/${props.langfuseTraceId}`
+  if (!props.langfuseProjectId) return '#'
+  const host = props.langfuseHost || 'https://cloud.langfuse.com'
+  return `${host}/project/${props.langfuseProjectId}/traces`
 })
 
 const langsmithLink = computed(() => {
@@ -113,8 +116,8 @@ const langsmithLink = computed(() => {
             </button>
           </div>
           <div v-else class="obs-missing-note">Set `LANGFUSE_PUBLIC_KEY` in `.env` to trace.</div>
-          <a :href="langfuseLink" target="_blank" class="obs-link" :class="{ disabled: !langfuseTraceId }">
-            Open Langfuse Trace ↗
+          <a :href="langfuseLink" target="_blank" class="obs-link" :class="{ disabled: !props.langfuseProjectId }">
+            Open Langfuse Traces ↗
           </a>
         </div>
       </div>
@@ -315,13 +318,15 @@ const langsmithLink = computed(() => {
 }
 
 .obs-badge.langfuse {
-  background: oklch(0.95 0.02 230);
-  color: oklch(0.2 0.05 230);
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+  border: 1px solid rgba(0, 212, 255, 0.3);
 }
 
 .obs-badge.langsmith {
-  background: oklch(0.95 0.02 120);
-  color: oklch(0.2 0.05 120);
+  background: rgba(0, 245, 212, 0.12);
+  color: #00f5d4;
+  border: 1px solid rgba(0, 245, 212, 0.3);
 }
 
 .obs-status {
